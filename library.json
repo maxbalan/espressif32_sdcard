@@ -1,0 +1,20 @@
+{
+	"name": "SdCardHelper",
+	"version": "1.0.0",
+	"description": "a wrapper around espressif IDF esp-32 sdcard implementation",
+	"keywords": "sdcard, espressif, esp32",
+	"repository":
+	{
+	  "type": "git",
+	  "url": "https://github.com/maxbalan/espressif32_sdcard"
+	},
+	"authors":
+	[
+	  {
+	    "name": "maxbalan"
+	  }
+	],
+	"license": "MIT",
+	"frameworks": "espidf",
+	"platforms": ["espressif32"]
+   }
