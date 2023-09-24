@@ -31,3 +31,5 @@ typedef struct SdCard SdCard;
 SdCard mount_sdcard(sdcard_config sdcard_config);
 
 void unmount_sdcard(SdCard *card);
+
+void sdcard_rename_file(SdCard *card, const char* file_path, const char *file_name, const char* new_file_name);

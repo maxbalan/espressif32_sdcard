@@ -100,3 +100,29 @@ void unmount_sdcard(SdCard *card) {
     ESP_LOGI(TAG, "Card unmounted");
     spi_bus_free(card->host.slot);
 }
+
+void sdcard_rename_file(SdCard *card, const char *file_path, const char *file_name, const char *new_file_name) {
+    struct stat st;
+    char *oldFilePath = malloc(strlen(file_name) + strlen(card->config->mount_point) + strlen(file_path));
+    strcpy(oldFilePath, card->config->mount_point);
+    strcat(oldFilePath, file_path);
+    strcat(oldFilePath, file_name);
+
+    char *newFilePath = malloc(strlen(new_file_name) + strlen(card->config->mount_point) + strlen(file_path));
+    strcpy(newFilePath, card->config->mount_point);
+    strcat(newFilePath, file_path);
+    strcat(newFilePath, new_file_name);
+
+    ESP_LOGI(TAG, "rename file[ %s ] to [ %s ]", oldFilePath, newFilePath);
+
+    if (stat(oldFilePath, &st) == 0) {
+        // Delete it if it exists
+        ESP_LOGI(TAG, "Ping file found!");
+    }
+
+    // Rename original file
+    if (rename(oldFilePath, newFilePath) != 0) {
+        ESP_LOGE(TAG, "Rename failed");
+        return;
+    }
+}
