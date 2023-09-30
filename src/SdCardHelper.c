@@ -28,7 +28,7 @@ static const char *TAG = "SdCard >>> ";
 //     return ESP_OK;
 // }
 
-SdCard mount_sdcard(sdcard_config config) {
+SdCard sdcard_mount(sdcard_config config) {
     SdCard sd_card;
     esp_err_t ret;
 
@@ -95,34 +95,88 @@ SdCard mount_sdcard(sdcard_config config) {
     return sd_card;
 }
 
-void unmount_sdcard(SdCard *card) {
+void sdcard_unmount(SdCard *card) {
     esp_vfs_fat_sdcard_unmount(card->config->mount_point, card->card);
     ESP_LOGI(TAG, "Card unmounted");
     spi_bus_free(card->host.slot);
 }
 
-void sdcard_rename_file(SdCard *card, const char *file_path, const char *file_name, const char *new_file_name) {
-    struct stat st;
-    char *oldFilePath = malloc(strlen(file_name) + strlen(card->config->mount_point) + strlen(file_path));
-    strcpy(oldFilePath, card->config->mount_point);
-    strcat(oldFilePath, file_path);
-    strcat(oldFilePath, file_name);
+void sdcard_create_dir(const char *path) {
+    struct stat st = {0};
 
-    char *newFilePath = malloc(strlen(new_file_name) + strlen(card->config->mount_point) + strlen(file_path));
-    strcpy(newFilePath, card->config->mount_point);
-    strcat(newFilePath, file_path);
-    strcat(newFilePath, new_file_name);
+    if (stat(path, &st) == -1) {
+        mkdir(path, 0755);
+    }
+}
+
+void sdcard_create_file(SdCard *card, const char *file_path) {
+    struct stat st = {0};
+    char *dir_path = strdup(file_path);
+    char *last_slash = strrchr(dir_path, '/');
+
+    if (last_slash != NULL) {
+        *last_slash = '\0';  // null-terminate at last slash to get directory path
+
+        if (stat(dir_path, &st) == -1) {
+            sdcard_create_dir(dir_path);
+        }
+        free(dir_path);
+
+        FILE *file = fopen(file_path, "w");
+        if (file) {
+            fclose(file);
+            printf("File created successfully: %s\n", file_path);
+        } else {
+            printf("Error: Couldn't create file %s\n", file_path);
+        }
+    } else {
+        printf("Error: No directory separator found in the path.\n");
+        free(dir_path);
+    }
+}
+
+void sdcard_remove_file(SdCard *card, const char *file_path) {
+    struct stat hSt;
+
+    if (stat(file_path, &hSt) == 0) {
+        // Delete it if it exists
+        unlink(file_path);
+        ESP_LOGI(TAG, "File deleted!");
+    }
+}
+
+void sdcard_move_file(SdCard *card, const char *source_file_path, const char *destination_file_path) {
+    struct stat st;
+    char *oldFilePath = malloc(strlen(source_file_path) + strlen(card->config->mount_point));
+    char *newFilePath = malloc(strlen(destination_file_path) + strlen(card->config->mount_point));
+
+    if (!oldFilePath || !newFilePath) {
+        ESP_LOGE(TAG, "Error: Memory allocation failed.\n");
+        free(oldFilePath);
+        free(newFilePath);
+        return;
+    }
+
+    sprintf(oldFilePath, "%s%s", card->config->mount_point, source_file_path);
+    sprintf(newFilePath, "%s%s", card->config->mount_point, destination_file_path);
+
+    if (access(oldFilePath, F_OK) != 0) {
+        ESP_LOGE(TAG, "Error: Source file does not exist.\n");
+        free(oldFilePath);
+        free(newFilePath);
+        return;
+    }
 
     ESP_LOGI(TAG, "rename file[ %s ] to [ %s ]", oldFilePath, newFilePath);
 
-    if (stat(oldFilePath, &st) == 0) {
-        // Delete it if it exists
-        ESP_LOGI(TAG, "Ping file found!");
-    }
+    sdcard_remove_file(card, newFilePath);
 
     // Rename original file
     if (rename(oldFilePath, newFilePath) != 0) {
-        ESP_LOGE(TAG, "Rename failed");
+        ESP_LOGE(TAG, "Rename failed [ %d ]", errno);
         return;
     }
+
+    free(oldFilePath);
+    free(newFilePath);
 }

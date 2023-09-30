@@ -4,6 +4,7 @@
 #include "esp_vfs.h"
 #include "esp_vfs_fat.h"
 #include "sdmmc_cmd.h"
+#include "errno.h"
 
 typedef struct pin_config {
     int miso;
@@ -28,8 +29,8 @@ struct SdCard {
 
 typedef struct SdCard SdCard;
 
-SdCard mount_sdcard(sdcard_config sdcard_config);
+SdCard sdcard_mount(sdcard_config sdcard_config);
 
-void unmount_sdcard(SdCard *card);
+void sdcard_unmount(SdCard *card);
 
-void sdcard_rename_file(SdCard *card, const char* file_path, const char *file_name, const char* new_file_name);
+void sdcard_move_file(SdCard *card, const char *source_file_path, const char *destination_file_path);
