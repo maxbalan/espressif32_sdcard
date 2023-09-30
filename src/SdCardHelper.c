@@ -8,26 +8,6 @@
 static const char *TAG = "SdCard >>> ";
 #endif
 
-// #define PIN_NUM_MISO 19
-// #define PIN_NUM_MOSI 23
-// #define PIN_NUM_CLK 18
-// #define PIN_NUM_CS 5
-// #define SDCARD_MAX_REQ_KHZ 8000
-
-// static esp_err_t s_example_write_file(const char *path, char *data) {
-//     ESP_LOGI(TAG, "Opening file %s", path);
-//     FILE *f = fopen(path, "w");
-//     if (f == NULL) {
-//         ESP_LOGE(TAG, "Failed to open file for writing");
-//         return ESP_FAIL;
-//     }
-//     fprintf(f, data);
-//     fclose(f);
-//     ESP_LOGI(TAG, "File written");
-
-//     return ESP_OK;
-// }
-
 SdCard sdcard_mount(sdcard_config config) {
     SdCard sd_card;
     esp_err_t ret;
