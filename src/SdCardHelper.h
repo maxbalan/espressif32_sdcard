@@ -30,4 +30,6 @@ SdCard sdcard_mount(sdcard_config sdcard_config);
 
 void sdcard_unmount(SdCard *card);
 
+void sdcard_delete_file(SdCard *card, const char *source_file_path);
+
 void sdcard_move_file(SdCard *card, const char *source_file_path, const char *destination_file_path);

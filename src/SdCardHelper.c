@@ -115,13 +115,15 @@ void sdcard_create_file(SdCard *card, const char *file_path) {
     }
 }
 
-void sdcard_remove_file(SdCard *card, const char *file_path) {
+void sdcard_delete_file(SdCard *card, const char *file_path) {
     struct stat hSt;
 
     if (stat(file_path, &hSt) == 0) {
         // Delete it if it exists
         unlink(file_path);
         ESP_LOGI(TAG, "File deleted!");
+    } else {
+        ESP_LOGI(TAG, "File not found or failed to delete!");
     }
 }
 
@@ -149,7 +151,7 @@ void sdcard_move_file(SdCard *card, const char *source_file_path, const char *de
 
     ESP_LOGI(TAG, "rename file[ %s ] to [ %s ]", oldFilePath, newFilePath);
 
-    sdcard_remove_file(card, newFilePath);
+    sdcard_delete_file(card, newFilePath);
 
     // Rename original file
     if (rename(oldFilePath, newFilePath) != 0) {
